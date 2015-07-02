@@ -177,6 +177,7 @@ function SHA1(msg) {
 
 }
 
+'use strict';
 function copy(obj) {
     if (obj == null || typeof (obj) != 'object')
         return obj;
@@ -216,7 +217,7 @@ function Resource(appId, appKey, baseurl) {
         'exists': {method: "GET",params: ["_id"]},
         'findOne': {method: 'GET',params: ["filter"]},
         'verify': {method: "POST",params: ["email", "language", "username"],alias: "verifyEmail"},
-        'reset': {method: "POST",params: ["id","email", "language", "username"],alias: "resetRequest"}
+        'reset': {method: "POST",params: ["email", "language", "username"],alias: "resetRequest"}
     };
     this.headers={};
     this.setHeaders("X-APICloud-AppId",this.appId);
@@ -226,7 +227,6 @@ function Resource(appId, appKey, baseurl) {
 Resource.prototype.setHeaders=function(key,value){
     this.headers[key]=value;
 }
-
 Resource.prototype.batch=function(requests,callback){
     var ajaxConfig={
         url: this.baseurl+"/batch",
@@ -243,23 +243,23 @@ Resource.prototype.batch=function(requests,callback){
         callback(ret, err)
     });
 }
-
-Resource.prototype.upload = function (modelName,isFilter, filepath, params, callback) {
+Resource.prototype.upload = function (modelName,isFilter, item, params, callback) {
     if (typeof params == "function") {
         callback = params;
         params = {};
     }
+    var filepath=item.path;
+    var values = item.values||{};
     var url=params["_id"]&&params["_relation"]?("/"+modelName+"/"+params["_id"]+"/"+params["_relation"]):"/file";
     var isPut=(!params["_relation"])&&params["_id"];
     var fileUrl = this.baseurl + url + ( isPut ? ("/" + params["_id"]) : "");
     var filename = filepath.substr(filepath.lastIndexOf("/") + 1, filepath.length);
+    if(!values["filename"]) values[filename]=filename;
     var ajaxConfig={
         url: fileUrl,
         method: isPut ? "PUT" : "POST",
         data: {
-            values: {
-                filename: filename
-            },
+            values: values,
             files: {
                 file: filepath
             }
@@ -267,7 +267,7 @@ Resource.prototype.upload = function (modelName,isFilter, filepath, params, call
     }
     ajaxConfig["headers"] = {};
     for(var header in this.headers){
-		if(header=="Content-Type") continue;
+        if(header=="Content-Type") continue;
         ajaxConfig["headers"][header]=this.headers[header];
     }
     api.ajax(ajaxConfig, function (ret, err) {
@@ -334,7 +334,7 @@ Resource.prototype.Factory = function (modelName) {
                             isFilter = false;
                         }
                         fileCount++;
-                        self.upload(modelName,isFilter, item.path, params, function (err, returnData) {
+                        self.upload(modelName,isFilter, item, params, function (err, returnData) {
                             if (err) {
                                 return callback(null, err);
                             } else {

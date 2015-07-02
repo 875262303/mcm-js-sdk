@@ -1,7 +1,7 @@
 
 ##概述
 
-APICloud的 JS SDK 是参考 angular-resource.js 类库,基于api.ajax而写成的原生 JavaScript 类库. 它与已经存在的 JavaScript 程序是兼容的, ,支持对象化操作，简化文件上传、多个文件上传、Relation相关操作,只需要在你的代码中做出一点点改变.因为是基于api.ajax的参数封装类库,所以可以做到最小的影响性能, 最小化配置, 让你很快地用在 APICloud 上使用 JavaScript 和 HTML5.
+APICloud的 JS SDK 是参考 angular-resource.js 类库,基于api.ajax而写成的原生 JavaScript 类库. 它与已经存在的 JavaScript 程序是兼容的, ,支持对象化操作,简化文件上传、多个文件上传、Relation相关操作,只需要在你的代码中做出一点点改变.因为是基于api.ajax的参数封装类库,所以可以做到最小的影响性能, 最小化配置, 让你很快地用在 APICloud 上使用 JavaScript 和 HTML5.
 
 
 
@@ -18,19 +18,19 @@ appId：
 
 - 类型：字符串
 - 默认值：无
-- 描述：应用的id，在APICloud上应用概览里获取，不能为空
+- 描述：应用的id,在APICloud上应用概览里获取,不能为空
 
 appKey：
 
 - 类型：字符串
 - 默认值：无
-- 描述：应用的安全校验Key，在APICloud上应用概览里获取，不能为空
+- 描述：应用的安全校验Key,在APICloud上应用概览里获取,不能为空
 
 url：
 
 - 类型：字符串
 - 默认值：无
-- 描述：应用服务器地址，可为空，为空时默认为编译时的服务器地址
+- 描述：应用服务器地址,可为空,为空时默认为编译时的服务器地址
 
 ####示例代码
 
@@ -103,7 +103,7 @@ value：
 
 - 类型：JSON对象
 - 默认值：无
-- 描述：插入的键值对，与服务器上class中键值对应，不能为空
+- 描述：插入的键值对,与服务器上class中键值对应,不能为空
 
 ####callback(ret, err)
 
@@ -144,14 +144,14 @@ _id：
 
 - 类型：字符串
 - 默认值：无
-- 描述：被删除数据的行ID，不能为空
+- 描述：被删除数据的行ID,不能为空
 
 ####callback(ret, err)
 
 ret：
 
 - 类型：JSON对象
-- 描述：成功信息，成功返回{}空对象
+- 描述：成功信息,成功返回{}空对象
 
 err：
 
@@ -185,7 +185,7 @@ id：
 
 - 类型：字符串
 - 默认值：无
-- 描述：将要更新数据的行ID，不能为空
+- 描述：将要更新数据的行ID,不能为空
 
 ####body
 
@@ -193,7 +193,7 @@ value：
 
 - 类型：JSON
 - 默认值：无
-- 描述：将要更新的键值对，与服务器上class中键值对应，不能为空
+- 描述：将要更新的键值对,与服务器上class中键值对应,不能为空
 
 ####callback(ret, err)
 
@@ -229,7 +229,7 @@ _id：
 
 - 类型：字符串
 - 默认值：无
-- 描述：被查找数据的行ID，不能为空
+- 描述：被查找数据的行ID,不能为空
 
 ####callback(ret, err)
 
@@ -340,7 +340,7 @@ _id：
 
 - 类型：字符串
 - 默认值：无
-- 描述：被查找数据的行ID，可为空，为空时返回对象是否存在
+- 描述：被查找数据的行ID,可为空,为空时返回对象是否存在
 
 ####callback(ret, err)
 
@@ -379,16 +379,17 @@ value
 
 - 类型：JSON对象
 - 默认值：无
-- 描述：提交的文件及相关数据，不能为空
+- 描述：提交的文件及相关数据,不能为空
 - 内部字段：
 
 ```js
 {
-  file:			//文件对象名称，file表为file，file字段则为具体名称
+  file:			//文件对象名称,file表为file,file字段则为具体名称
   {
-    isFile:true，	//标示对象是一个文件对象
-	isFileClass:true，//标示当前是对file表进行操作，file表作为Relation表的时候必须
-    path:''		//文件地址
+    isFile:true,	//标示对象是一个文件对象
+	  isFileClass:true,//标示当前是对file表进行操作,file表作为Relation表的时候必须
+    path:'',		//文件地址
+    values:{}//自定义字段或者filename
   }
 };
 ```
@@ -397,7 +398,7 @@ value
 ret：
 
 - 类型：JSON对象
-- 描述：成功信息，服务器返回的数据
+- 描述：成功信息,服务器返回的数据
 
 err：
 
@@ -411,7 +412,7 @@ err：
 var File = client.Factory("file");
 
 api.getPicture({},function(ret,err){
-    File.save({file:{isFile:true,path:ret.data}},function(data,err){
+    File.save({file:{isFile:true,path:ret.data,values:{filename:"头像.png"}}},function(data,err){
         alert("file:\t"+JSON.stringify(data));
         alert("file:\t"+JSON.stringify(err));
     })
@@ -429,7 +430,7 @@ api.getPicture({},function(ret,err){
   });
 })
 
-//file表作为Relation表，isFileClass必须设置，否则无法上传
+//file表作为Relation表,isFileClass必须设置,否则无法上传
 var RelationFile = client.Factory("relationFile");
 api.getPicture({},function(ret,err){
     RelationFile.save({"_id":"{{id}}","_relation":"{{relationName}}"},{file:{isFileClass:true,isFile:true,path:ret.data}},function(data,err){
@@ -457,13 +458,13 @@ _id：
 
 - 类型：字符串
 - 默认值：无
-- 描述：被插入对象ID，不能为空
+- 描述：被插入对象ID,不能为空
 
 _relation：
 
 - 类型：字符串
 - 默认值：无
-- 描述：关系列的名称，对应服务器上的同名relation，不能为空
+- 描述：关系列的名称,对应服务器上的同名relation,不能为空
 
 ####body
 
@@ -471,7 +472,7 @@ value：
 
 - 类型：JSON对象
 - 默认值：无
-- 描述：插入的键值对，与服务器上class中键值对应，不能为空
+- 描述：插入的键值对,与服务器上class中键值对应,不能为空
 
 ####callback(ret, err)
 
@@ -509,13 +510,13 @@ _id：
 
 - 类型：字符串
 - 默认值：无
-- 描述：被查找对象ID，不能为空
+- 描述：被查找对象ID,不能为空
 
 _relation：
 
 - 类型：字符串
 - 默认值：无
-- 描述：关系列的名称，对应服务器上的同名relation，不能为空
+- 描述：关系列的名称,对应服务器上的同名relation,不能为空
 
 ####callback(ret, err)
 
@@ -553,13 +554,13 @@ id：
 
 - 类型：字符串
 - 默认值：无
-- 描述：被查找对象ID，不能为空
+- 描述：被查找对象ID,不能为空
 
 _relation：
 
 - 类型：字符串
 - 默认值：无
-- 描述：关系列的名称，对应服务器上的同名relation，不能为空
+- 描述：关系列的名称,对应服务器上的同名relation,不能为空
 
 ####callback(ret, err)
 
@@ -598,13 +599,13 @@ id：
 
 - 类型：字符串
 - 默认值：无
-- 描述：被删除对象ID，不能为空
+- 描述：被删除对象ID,不能为空
 
 _relation：
 
 - 类型：字符串
 - 默认值：无
-- 描述：关系列的名称，对应服务器上的同名relation，不能为空
+- 描述：关系列的名称,对应服务器上的同名relation,不能为空
 
 ####callback(ret, err)
 
@@ -632,7 +633,7 @@ Model.delete({"_id":"xxxxxxxxxxxxxx","_relation":"many"}, function (ret,err) {
 ##用户相关
 
 ####概述
-user对象提供用户独有操作，如登录、注销、发送重置密码邮件、发送验证邮件。
+user对象提供用户独有操作,如登录、注销、发送重置密码邮件、发送验证邮件。
 
 ###**login**
 
@@ -646,13 +647,13 @@ username：
 
 - 类型：字符串
 - 默认值：无
-- 描述：用户名，不能为空
+- 描述：用户名,不能为空
 
 password：
 
 - 类型：字符串
 - 默认值：无
-- 描述：密码，不能为空
+- 描述：密码,不能为空
 
 ####callback(ret, err)
 
@@ -734,7 +735,7 @@ language：
 
 - 类型：字符串
 - 默认值：无
-- 描述：邮件需要使用的语言，为了应多多语言，中文（zh_CN），英文（en_US）
+- 描述：邮件需要使用的语言,为了应多多语言,中文（zh_CN）,英文（en_US）
 
 ####callback(ret, err)
 
@@ -782,7 +783,7 @@ language：
 
 - 类型：字符串
 - 默认值：无
-- 描述：邮件需要使用的语言，为了应多多语言，中文（zh_CN），英文（en_US）
+- 描述：邮件需要使用的语言,为了应多多语言,中文（zh_CN）,英文（en_US）
 
 ####callback(ret, err)
 
@@ -814,9 +815,9 @@ User.reset({"email":email, "language":"zh_CN", "username":username},function(ret
 var Model = client.Factory("modelName");
 
 Model.query({filter：{
-	where：{}，
-	skip：0，
-	limit：10，
+	where：{},
+	skip：0,
+	limit：10,
 	order："id Desc",
 	include:"relation"
 }}, function (ret,err) {
