@@ -818,7 +818,7 @@ Model.query({filter：{
 	where：{},
 	skip：0,
 	limit：10,
-	order："id Desc",
+	order："id DESC",
 	include:"relation"
 }}, function (ret,err) {
   console.log("Model count:"+JSON.stringify(ret))
