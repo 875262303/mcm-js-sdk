@@ -285,9 +285,7 @@ function SHA1(msg) {
 
 /*
   rest.js  
-*/    
-
-'use strict';
+*/
 function copy(obj) {
     if (obj == null || typeof (obj) != 'object')
         return obj;
@@ -321,13 +319,13 @@ function Resource(appId, appKey, baseurl) {
         'save': {method: 'POST',params: ["_id", "_relation"]}, //_relationid 后续支持
         'query': {method: 'GET',params: ["filter"]},
         'delete': {method: 'DELETE',params: ["_id", "_relation"]}, //_relationid 后续支持
-        'login': {method: "POST",params: ["username", "passwordd"]},
-        'logout': {method: "POST",params: ["token"]},
+        'login': {method: "POST",params: ["username", "password"]},
+        'logout': {method: "POST"},
         'count': {method: "GET",params: ["_id", "_relation","filter"]},
         'exists': {method: "GET",params: ["_id"]},
         'findOne': {method: 'GET',params: ["filter"]},
         'verify': {method: "POST",params: ["email", "language", "username"],alias: "verifyEmail"},
-        'reset': {method: "POST",params: ["id","email", "language", "username"],alias: "resetRequest"}
+        'reset': {method: "POST",params: ["email", "language", "username"],alias: "resetRequest"}
     };
     this.headers={};
     this.setHeaders("X-APICloud-AppId",this.appId);
@@ -337,22 +335,39 @@ function Resource(appId, appKey, baseurl) {
 Resource.prototype.setHeaders=function(key,value){
     this.headers[key]=value;
 }
-Resource.prototype.upload = function (modelName,isFilter, filepath, params, callback) {
+Resource.prototype.batch=function(requests,callback){
+    var ajaxConfig={
+        url: this.baseurl+"/batch",
+        method: "POST",
+        data: {
+            body:JSON.stringify({requests:requests})
+        }
+    }
+    ajaxConfig["headers"] = {};
+    for(var header in this.headers){
+        ajaxConfig["headers"][header]=this.headers[header];
+    }
+    api.ajax(ajaxConfig, function (ret,err) {
+        callback(ret, err)
+    });
+}
+Resource.prototype.upload = function (modelName,isFilter, item, params, callback) {
     if (typeof params == "function") {
         callback = params;
         params = {};
     }
+    var filepath=item.path;
+    var values = item.values||{};
     var url=params["_id"]&&params["_relation"]?("/"+modelName+"/"+params["_id"]+"/"+params["_relation"]):"/file";
     var isPut=(!params["_relation"])&&params["_id"];
     var fileUrl = this.baseurl + url + ( isPut ? ("/" + params["_id"]) : "");
     var filename = filepath.substr(filepath.lastIndexOf("/") + 1, filepath.length);
+    if(!values["filename"]) values["filename"]=filename;
     var ajaxConfig={
         url: fileUrl,
         method: isPut ? "PUT" : "POST",
         data: {
-            values: {
-                filename: filename
-            },
+            values: values,
             files: {
                 file: filepath
             }
@@ -360,6 +375,7 @@ Resource.prototype.upload = function (modelName,isFilter, filepath, params, call
     }
     ajaxConfig["headers"] = {};
     for(var header in this.headers){
+        if(header=="Content-Type") continue;
         ajaxConfig["headers"][header]=this.headers[header];
     }
     api.ajax(ajaxConfig, function (ret, err) {
@@ -416,7 +432,7 @@ Resource.prototype.Factory = function (modelName) {
                 default:
                     throw new Error("参数最多为3个");
             }
-            if (hasBody) {
+            if (hasBody&&name != "logout") {
                 var fileCount = 0;
                 Object.keys(data).forEach(function (key) {
                     var item = data[key];
@@ -426,7 +442,7 @@ Resource.prototype.Factory = function (modelName) {
                             isFilter = false;
                         }
                         fileCount++;
-                        self.upload(modelName,isFilter, item.path, params, function (err, returnData) {
+                        self.upload(modelName,isFilter, item, (modelName == "file"?params:{}), function (err, returnData) {
                             if (err) {
                                 return callback(null, err);
                             } else {
@@ -454,14 +470,14 @@ Resource.prototype.Factory = function (modelName) {
                     httpConfig["headers"][header]=self.headers[header];
                 }
                 if (name === "logout"&&!httpConfig["headers"]["authorization"]) {
-                     return callback({status:0,msg:"未设置authorization参数,无法注销!"}, null);
+                    return callback({status:0,msg:"未设置authorization参数,无法注销!"}, null);
                 }
                 if (hasBody) {
                     httpConfig.data = {
                         body: JSON.stringify(data)
                     };
                 }
-                
+
                 if (params && (name == "save") && params["_id"] && (!params["_relation"]) && (!params["_relationid"])) {
                     action.method = "PUT";
                 }
@@ -524,6 +540,7 @@ Route.prototype = {
         config.url = this.baseurl + url;
     }
 };
+
 //==========================================
 
 function factory(modelName){
