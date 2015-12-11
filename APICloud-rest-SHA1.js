@@ -207,55 +207,64 @@ function Resource(appId, appKey, baseurl) {
     this.baseurl = baseurl || "https://d.apicloud.com/mcm/api";
     this.appCode = SHA1(appId + "UZ" + appKey + "UZ" + now) + "." + now;
     this.defaultactions = {
-        'get': {method: 'GET',params: ["_id", "_relation"]}, //_relationid 后续支持
-        'save': {method: 'POST',params: ["_id", "_relation"]}, //_relationid 后续支持
-        'query': {method: 'GET',params: ["filter"]},
-        'delete': {method: 'DELETE',params: ["_id", "_relation"]}, //_relationid 后续支持
-        'login': {method: "POST",params: ["username", "password"]},
-        'logout': {method: "POST"},
-        'count': {method: "GET",params: ["_id", "_relation","filter"]},
-        'exists': {method: "GET",params: ["_id"]},
-        'findOne': {method: 'GET',params: ["filter"]},
-        'verify': {method: "POST",params: ["email", "language", "username"],alias: "verifyEmail"},
-        'reset': {method: "POST",params: ["email", "language", "username"],alias: "resetRequest"}
+        'get': { method: 'GET', params: ["_id", "_relation"] }, //_relationid 后续支持
+        'save': { method: 'POST', params: ["_id", "_relation"] }, //_relationid 后续支持
+        'query': { method: 'GET', params: ["filter"] },
+        'delete': { method: 'DELETE', params: ["_id", "_relation"] }, //_relationid 后续支持
+        'login': { method: "POST", params: ["username", "password"] },
+        'logout': { method: "POST" },
+        'count': { method: "GET", params: ["_id", "_relation", "filter"] },
+        'exists': { method: "GET", params: ["_id"] },
+        'findOne': { method: 'GET', params: ["filter"] },
+        'verify': { method: "POST", params: ["email", "language", "username"], alias: "verifyEmail" },
+        'reset': { method: "POST", params: ["email", "language", "username"], alias: "resetRequest" }
     };
-    this.headers={};
-    this.setHeaders("X-APICloud-AppId",this.appId);
-    this.setHeaders("X-APICloud-AppKey",this.appCode);
-    this.setHeaders("Content-Type","application/json;");
+    this.headers = {};
+    this.setHeaders("X-APICloud-AppId", this.appId);
+    this.setHeaders("X-APICloud-AppKey", this.appCode);
+    this.setHeaders("Content-Type", "application/json;");
 }
-Resource.prototype.setHeaders=function(key,value){
-    this.headers[key]=value;
+Resource.prototype.setHeaders = function (key, value) {
+    this.headers[key] = value;
 }
-Resource.prototype.batch=function(requests,callback){
-    var ajaxConfig={
-        url: this.baseurl+"/batch",
+Resource.prototype.batch = function (requests, callback) {
+    for (var i = 0, len = requests.length; i < len; i++) {
+        var request = requests[i];
+        if (request["method"] && request["method"].toUpperCase() === "GET" && request["body"]) {
+            var url = request["path"];
+            var index = url.indexOf('?');
+            request["path"] = url.substring(0, index) + "?filter=" + JSON.stringify(request["body"]);
+            delete request["body"];
+        }
+    }
+    var ajaxConfig = {
+        url: this.baseurl + "/batch",
         method: "POST",
         data: {
-            body:JSON.stringify({requests:requests})
+            body: JSON.stringify({ requests: requests })
         }
     }
     ajaxConfig["headers"] = {};
-    for(var header in this.headers){
-        ajaxConfig["headers"][header]=this.headers[header];
+    for (var header in this.headers) {
+        ajaxConfig["headers"][header] = this.headers[header];
     }
-    api.ajax(ajaxConfig, function (ret,err) {
+    api.ajax(ajaxConfig, function (ret, err) {
         callback(ret, err)
     });
 }
-Resource.prototype.upload = function (modelName,isFilter, item, params, callback) {
+Resource.prototype.upload = function (modelName, isFilter, item, params, callback) {
     if (typeof params == "function") {
         callback = params;
         params = {};
     }
-    var filepath=item.path;
-    var values = item.values||{};
-    var url=params["_id"]&&params["_relation"]?("/"+modelName+"/"+params["_id"]+"/"+params["_relation"]):"/file";
-    var isPut=(!params["_relation"])&&params["_id"];
-    var fileUrl = this.baseurl + url + ( isPut ? ("/" + params["_id"]) : "");
+    var filepath = item.path;
+    var values = item.values || {};
+    var url = params["_id"] && params["_relation"] ? ("/" + modelName + "/" + params["_id"] + "/" + params["_relation"]) : "/file";
+    var isPut = (!params["_relation"]) && params["_id"];
+    var fileUrl = this.baseurl + url + (isPut ? ("/" + params["_id"]) : "");
     var filename = filepath.substr(filepath.lastIndexOf("/") + 1, filepath.length);
-    if(!values["filename"]) values["filename"]=filename;
-    var ajaxConfig={
+    if (!values["filename"]) values["filename"] = filename;
+    var ajaxConfig = {
         url: fileUrl,
         method: isPut ? "PUT" : "POST",
         data: {
@@ -266,9 +275,9 @@ Resource.prototype.upload = function (modelName,isFilter, item, params, callback
         }
     }
     ajaxConfig["headers"] = {};
-    for(var header in this.headers){
-        if(header=="Content-Type") continue;
-        ajaxConfig["headers"][header]=this.headers[header];
+    for (var header in this.headers) {
+        if (header == "Content-Type") continue;
+        ajaxConfig["headers"][header] = this.headers[header];
     }
     api.ajax(ajaxConfig, function (ret, err) {
         if (ret && ret.id && !err) {
@@ -293,7 +302,7 @@ Resource.prototype.Factory = function (modelName) {
     var actions = copy(this.defaultactions);
     var resourceFactory = new Object();
     Object.keys(actions).forEach(function (name) {
-        if (modelName != "user" && ["login", "logout", "verify", "reset"].indexOf(name) != -1){ return;}
+        if (modelName != "user" && ["login", "logout", "verify", "reset"].indexOf(name) != -1) { return; }
         resourceFactory[name] = function (a1, a2, a3) {
             var action = copy(actions[name]);
             var params = {}, data, callback;
@@ -324,17 +333,17 @@ Resource.prototype.Factory = function (modelName) {
                 default:
                     throw new Error("参数最多为3个");
             }
-            if (hasBody&&name != "logout") {
+            if (hasBody && name != "logout") {
                 var fileCount = 0;
                 Object.keys(data).forEach(function (key) {
                     var item = data[key];
                     if (item && item.isFile) {
                         var isFilter = true;
-                        if (modelName == "file"||item.isFileClass) {
+                        if (modelName == "file" || item.isFileClass) {
                             isFilter = false;
                         }
                         fileCount++;
-                        self.upload(modelName,isFilter, item, (modelName == "file"?params:{}), function (err, returnData) {
+                        self.upload(modelName, isFilter, item, (modelName == "file" ? params : {}), function (err, returnData) {
                             if (err) {
                                 return callback(null, err);
                             } else {
@@ -358,18 +367,18 @@ Resource.prototype.Factory = function (modelName) {
             function next() {
                 var httpConfig = {};
                 httpConfig["headers"] = {};
-                for(var header in self.headers){
-                    httpConfig["headers"][header]=self.headers[header];
+                for (var header in self.headers) {
+                    httpConfig["headers"][header] = self.headers[header];
                 }
-                if (name === "logout"&&!httpConfig["headers"]["authorization"]) {
-                     return callback({status:0,msg:"未设置authorization参数,无法注销!"}, null);
+                if (name === "logout" && !httpConfig["headers"]["authorization"]) {
+                    return callback({ status: 0, msg: "未设置authorization参数,无法注销!" }, null);
                 }
                 if (hasBody) {
                     httpConfig.data = {
                         body: JSON.stringify(data)
                     };
                 }
-                
+
                 if (params && (name == "save") && params["_id"] && (!params["_relation"]) && (!params["_relationid"])) {
                     action.method = "PUT";
                 }
@@ -394,6 +403,7 @@ Resource.prototype.Factory = function (modelName) {
                     curparams["_custom"] = action.alias || name;
                 }
                 route.setUrlParams(httpConfig, curparams);
+                httpConfig.cache = true;
                 console.log(httpConfig.method + "\t" + httpConfig.url);
                 api.ajax(httpConfig, function (ret, err) {
                     return callback(ret, err);

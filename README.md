@@ -860,6 +860,25 @@ path路径为相对路径
     "method": "GET",
     "path": "/mcm/api/company",
 }
+//或者
+
+{
+    "method": "GET",
+    "path": '/mcm/api/company?filter={"where":{"name":"APICloud"},"skip":0,"limit":1}',
+}
+
+{
+    path:"/mcm/api/company?dt=111121323",//?之后的会被忽略
+    method:"GET",
+    body:{
+        where:{
+          "name":"APICloud"
+        },
+        skip:0,
+        limit:1
+   }
+}    
+//以上两者是等价关系
 ```
 
 **POST**
