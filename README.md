@@ -290,6 +290,28 @@ Model.query(function (ret,err) {
     console.log("Model query:"+JSON.stringify(ret))
 });
 
+Model.query({
+  filter:{
+    where:{
+      "name":"APICloud",
+      "age":{"gt":20}
+    },
+    fileds:["id","name","age"],
+    skip:0,
+    limit:10,
+    include:"users",
+    includefilter:{
+      "user":{
+        where:{
+          "name":"aa"
+        }
+      }
+    }
+  }
+},function (ret,err) {
+    console.log("Model query:"+JSON.stringify(ret))
+});
+
 ```
 
 ###**查询数据条数**
@@ -871,11 +893,13 @@ path路径为相对路径
     path:"/mcm/api/company?dt=111121323",//?之后的会被忽略
     method:"GET",
     body:{
+      filter:{
         where:{
           "name":"APICloud"
         },
         skip:0,
         limit:1
+      }
    }
 }    
 //以上两者是等价关系

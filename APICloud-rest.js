@@ -51,10 +51,10 @@ Resource.prototype.setHeaders = function (key, value) {
 Resource.prototype.batch = function (requests, callback) {
     for (var i = 0, len = requests.length; i < len; i++) {
         var request = requests[i];
-        if (request["method"] && request["method"].toUpperCase() === "GET" && request["body"]) {
+        if (request["method"] && request["method"].toUpperCase() === "GET" && request["body"]&&request["body"]["filter"]) {
             var url = request["path"];
             var index = url.indexOf('?');
-            request["path"] = url.substring(0, index) + "?filter=" + JSON.stringify(request["body"]);
+            request["path"] = url.substring(0, index) + "?filter=" + JSON.stringify(request["body"]["filter"]);
             delete request["body"];
         }
     }
