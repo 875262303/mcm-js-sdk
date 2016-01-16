@@ -969,3 +969,177 @@ client.batch(requests, function (ret,err) {
  }   
 ]
 ```
+
+##短信验证码
+
+###**发送短信验证码**
+
+根据手机号发送短信验证码
+
+.sendvercode({params}, callback(ret, err))
+
+####params
+
+mobile:
+
+- 类型：字符串
+- 默认值：无
+- 描述：手机号，不能为空
+
+imageCode:
+
+- 类型：字符串
+- 默认值：无
+- 描述：图片验证码，如果开启图片验证码功能则不能为空
+
+token:
+
+- 类型：字符串
+- 默认值：无
+- 描述：图片验证码的标识，如果开启图片验证码功能则不能为空
+
+####callback(ret, err)
+
+ret：
+
+- 类型：JSON对象
+- 描述：发送成功则返回{successful:true}
+
+err：
+
+- 类型：JSON对象
+- 描述：错误信息
+
+####示例代码
+```js
+
+var Model = client.Factory("user");
+
+Model.sendvercode({
+  "mobile": {{手机号}}, 
+  "imageCode": {{图片验证码}},
+  "token":{{图片验证码标识}}
+}, function (ret,err) {
+  if(!err&&ret.successful){
+    //发送成功
+  }else{
+    //发送失败
+  }
+});
+
+```
+
+###**校验短信验证码**
+
+根据手机号校验短信验证码
+
+.checkvercode({params}, callback(ret, err))
+
+####params
+
+mobile:
+
+- 类型：字符串
+- 默认值：无
+- 描述：手机号，不能为空
+
+vercode:
+
+- 类型：字符串
+- 默认值：无
+- 描述：短信验证码，不能为空
+
+
+####callback(ret, err)
+
+ret：
+
+- 类型：JSON对象
+- 描述：发送成功则返回{successful:true}
+
+err：
+
+- 类型：JSON对象
+- 描述：错误信息
+
+####示例代码
+```js
+
+var Model = client.Factory("user");
+
+Model.checkvercode({
+  "mobile": {{手机号}}, 
+  "vercode": {{短信验证码}}
+}, function (ret,err) {
+  if(!err&&ret.successful){
+    //发送成功
+  }else{
+    //发送失败
+  }
+});
+
+```
+
+###**短信验证码重置密码**
+
+根据手机号短信验证码重置密码
+
+.resetByMobile({params}, callback(ret, err))
+
+####params
+
+mobile:
+
+- 类型：字符串
+- 默认值：无
+- 描述：手机号，不能为空
+
+vercode:
+
+- 类型：字符串
+- 默认值：无
+- 描述：短信验证码，不能为空
+
+username:
+
+- 类型：字符串
+- 默认值：无
+- 描述：用户名，不能为空
+
+password:
+
+- 类型：字符串
+- 默认值：无
+- 描述：密码，不能为空
+
+####callback(ret, err)
+
+ret：
+
+- 类型：JSON对象
+- 描述：发送成功则返回{successful:true}
+
+err：
+
+- 类型：JSON对象
+- 描述：错误信息
+
+####示例代码
+```js
+
+var Model = client.Factory("user");
+
+Model.resetByMobile({
+  "mobile": {{手机号}}, 
+  "vercode": {{短信验证码}},
+  "username": {{用户名}},
+  "password": {{密码}}
+}, function (ret,err) {
+  if(!err&&ret.successful){
+    //发送成功
+  }else{
+    //发送失败
+  }
+});
+
+```
